@@ -4,7 +4,7 @@ movies_module_UI <- function(id) {
   
   tagList(
     plotOutput(ns("scatterplot")),
-    dataTableOutput(ns("moviestable"))
+    DT::dataTableOutput(ns("moviestable"))
   )
   
 }

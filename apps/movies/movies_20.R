@@ -3,21 +3,22 @@ library(ggplot2)
 library(DT)
 library(stringr)
 library(dplyr)
+library(tools)
 load("movies.Rdata")
 
-# Define UI for application that plots features of movies ---------------------
+# Define UI for application that plots features of movies -----------
 ui <- fluidPage(
   
-  # Application title ---------------------------------------------------------
+  # Application title -----------------------------------------------
   titlePanel("Movie browser - without modules"),
   
-  # Sidebar layout with a input and output definitions ------------------------
+  # Sidebar layout with a input and output definitions --------------
   sidebarLayout(
     
-    # Inputs: Select variables to plot ----------------------------------------
+    # Inputs: Select variables to plot ------------------------------
     sidebarPanel(
       
-      # Select variable for y-axis --------------------------------------------
+      # Select variable for y-axis ----------------------------------
       selectInput(inputId = "y", 
                   label = "Y-axis:",
                   choices = c("IMDB rating" = "imdb_rating", 
@@ -27,7 +28,7 @@ ui <- fluidPage(
                               "Runtime" = "runtime"), 
                   selected = "audience_score"),
       
-      # Select variable for x-axis --------------------------------------------
+      # Select variable for x-axis ----------------------------------
       selectInput(inputId = "x", 
                   label = "X-axis:",
                   choices = c("IMDB rating" = "imdb_rating", 
@@ -37,57 +38,59 @@ ui <- fluidPage(
                               "Runtime" = "runtime"), 
                   selected = "critics_score"),
       
-      # Select variable for color ---------------------------------------------
+      # Select variable for color -----------------------------------
       selectInput(inputId = "z", 
                   label = "Color by:",
-                  choices = c("Genre" = "genre",
+                  choices = c("Title Type" = "title_type", 
+                              "Genre" = "genre", 
                               "MPAA Rating" = "mpaa_rating", 
                               "Critics Rating" = "critics_rating", 
                               "Audience Rating" = "audience_rating"),
                   selected = "mpaa_rating"),
       
-      # Set alpha level -------------------------------------------------------
+      # Set alpha level ---------------------------------------------
       sliderInput(inputId = "alpha", 
                   label = "Alpha:", 
                   min = 0, max = 1, 
                   value = 0.5),
       
-      # Set point size --------------------------------------------------------
+      # Set point size ----------------------------------------------
       sliderInput(inputId = "size", 
                   label = "Size:", 
                   min = 0, max = 5, 
                   value = 2),
       
-      # Show data table -------------------------------------------------------
+      # Show data table ---------------------------------------------
       checkboxInput(inputId = "show_data",
                     label = "Show data table",
                     value = TRUE)
       
     ),
     
-    # Output: -----------------------------------------------------------------
+    # Output: -------------------------------------------------------
     mainPanel(
       
-      # Show scatterplot ------------------------------------------------------
+      # Show scatterplot --------------------------------------------
       tabsetPanel(id = "movies", 
                   tabPanel("Documentaries", 
                            plotOutput("scatterplot_doc"),
-                           dataTableOutput("moviestable_doc")),
+                           DT::dataTableOutput("moviestable_doc")),
                   tabPanel("Feature Films", 
                            plotOutput("scatterplot_feature"),
-                           dataTableOutput("moviestable_feature")),
+                           DT::dataTableOutput("moviestable_feature")),
                   tabPanel("TV Movies", 
                            plotOutput("scatterplot_tv"),
-                           dataTableOutput("moviestable_tv"))
+                           DT::dataTableOutput("moviestable_tv"))
       )
+      
     )
   )
 )
 
-# Define server function required to create the scatterplot -------------------
+# Define server function required to create the scatterplot ---------
 server <- function(input, output, session) {
   
-  # Create subsets for various title types ------------------------------------
+  # Create subsets for various title types --------------------------
   docs <- reactive({
     filter(movies, title_type == "Documentary")
   })
@@ -100,7 +103,8 @@ server <- function(input, output, session) {
     filter(movies, title_type == "TV Movie")
   })
   
-  # Scatterplot for docs ------------------------------------------------------
+  
+  # Scatterplot for docs --------------------------------------------
   output$scatterplot_doc <- renderPlot({
     ggplot(data = docs(), aes_string(x = input$x, y = input$y, color = input$z)) +
       geom_point(alpha = input$alpha, size = input$size) +
@@ -110,7 +114,7 @@ server <- function(input, output, session) {
       )
   })
   
-  # Scatterplot for features --------------------------------------------------
+  # Scatterplot for features ----------------------------------------
   output$scatterplot_feature <- renderPlot({
     ggplot(data = features(), aes_string(x = input$x, y = input$y, color = input$z)) +
       geom_point(alpha = input$alpha, size = input$size) +
@@ -120,7 +124,7 @@ server <- function(input, output, session) {
       )    
   })
   
-  # Scatterplot for tvs -------------------------------------------------------
+  # Scatterplot for tvs ---------------------------------------------
   output$scatterplot_tv <- renderPlot({
     ggplot(data = tvs(), aes_string(x = input$x, y = input$y, color = input$z)) +
       geom_point(alpha = input$alpha, size = input$size) +
@@ -130,7 +134,7 @@ server <- function(input, output, session) {
       )    
   })
   
-  # Table for docs ------------------------------------------------------------
+  # Table for docs --------------------------------------------------
   output$moviestable_doc <- DT::renderDataTable(
     if(input$show_data){
       DT::datatable(data = docs()[, 1:7], 
@@ -139,7 +143,7 @@ server <- function(input, output, session) {
     }
   )
   
-  # Table for features --------------------------------------------------------
+  # Table for features ----------------------------------------------
   output$moviestable_feature <- DT::renderDataTable(
     if(input$show_data){
       DT::datatable(data = features()[, 1:7], 
@@ -148,17 +152,18 @@ server <- function(input, output, session) {
     }
   )  
   
-  # Table for tvs -------------------------------------------------------------
+  # Table for tvs ---------------------------------------------------
   output$moviestable_tv <- DT::renderDataTable(
-    if(input$show_data){
-      DT::datatable(data = tvs()[, 1:7], 
-                    options = list(pageLength = 10), 
-                    rownames = FALSE)
-    }
-  )  
+    if(input$show_data)
+      DT::datatable(data = tvs()[, 1:7],
+                    options = list(pageLength = 10),
+                    rownames = FALSE
+                    
+      )
+  )
   
 }
 
-# Run the application ---------------------------------------------------------
-shinyApp(ui = ui, server = server)
 
+# Run the app ------------------------------------------------------
+shinyApp(ui = ui, server = server)

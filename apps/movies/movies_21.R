@@ -3,22 +3,23 @@ library(ggplot2)
 library(DT)
 library(stringr)
 library(dplyr)
+library(tools)
 load("movies.Rdata")
 source("moviesmodule.R")
 
-# Define UI for application that plots features of movies ---------------------
+# Define UI for application that plots features of movies -----------
 ui <- fluidPage(
   
-  # Application title ---------------------------------------------------------
-  titlePanel("Movie browser - with modules"),
+  # Application title -----------------------------------------------
+  titlePanel("Movie browser - without modules"),
   
-  # Sidebar layout with a input and output definitions ------------------------
+  # Sidebar layout with a input and output definitions --------------
   sidebarLayout(
     
-    # Inputs: Select variables to plot ----------------------------------------
+    # Inputs: Select variables to plot ------------------------------
     sidebarPanel(
       
-      # Select variable for y-axis --------------------------------------------
+      # Select variable for y-axis ----------------------------------
       selectInput(inputId = "y", 
                   label = "Y-axis:",
                   choices = c("IMDB rating" = "imdb_rating", 
@@ -28,7 +29,7 @@ ui <- fluidPage(
                               "Runtime" = "runtime"), 
                   selected = "audience_score"),
       
-      # Select variable for x-axis --------------------------------------------
+      # Select variable for x-axis ----------------------------------
       selectInput(inputId = "x", 
                   label = "X-axis:",
                   choices = c("IMDB rating" = "imdb_rating", 
@@ -38,35 +39,36 @@ ui <- fluidPage(
                               "Runtime" = "runtime"), 
                   selected = "critics_score"),
       
-      # Select variable for color ---------------------------------------------
+      # Select variable for color -----------------------------------
       selectInput(inputId = "z", 
                   label = "Color by:",
-                  choices = c("Genre" = "genre",
+                  choices = c("Title Type" = "title_type", 
+                              "Genre" = "genre", 
                               "MPAA Rating" = "mpaa_rating", 
                               "Critics Rating" = "critics_rating", 
                               "Audience Rating" = "audience_rating"),
                   selected = "mpaa_rating"),
       
-      # Set alpha level -------------------------------------------------------
+      # Set alpha level ---------------------------------------------
       sliderInput(inputId = "alpha", 
                   label = "Alpha:", 
                   min = 0, max = 1, 
                   value = 0.5),
       
-      # Set point size --------------------------------------------------------
+      # Set point size ----------------------------------------------
       sliderInput(inputId = "size", 
                   label = "Size:", 
                   min = 0, max = 5, 
                   value = 2),
       
-      # Show data table -------------------------------------------------------
+      # Show data table ---------------------------------------------
       checkboxInput(inputId = "show_data",
                     label = "Show data table",
                     value = TRUE)
       
     ),
     
-    # Output: -----------------------------------------------------------------
+    # Output: -------------------------------------------------------
     mainPanel(
       
       # Show scatterplot ------------------------------------------------------
@@ -80,7 +82,7 @@ ui <- fluidPage(
   )
 )
 
-# Define server function required to create the scatterplot -------------------
+# Define server function required to create the scatterplot ---------
 server <- function(input, output, session) {
   
   x     <- reactive(input$x)
@@ -97,6 +99,6 @@ server <- function(input, output, session) {
   
 }
 
-# Run the application ---------------------------------------------------------
-shinyApp(ui = ui, server = server)
 
+# Run the app ------------------------------------------------------
+shinyApp(ui = ui, server = server)
